@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
+using System.Text;
 
 namespace MBus {
 
@@ -26,6 +27,15 @@ namespace MBus {
                         Console.WriteLine($"Received {list.Type}:");
                         Console.WriteLine($"DateTime: {list.Date}");
                         Console.WriteLine($"Active power: {list.ActivePower}");
+                        Console.WriteLine("");
+                        break;
+
+                    case List9 list:
+                        Console.WriteLine($"Received {list.Type}:");
+                        Console.WriteLine($"DateTime: {list.Date}");
+                        Console.WriteLine($"ListVersionIdentifier: {list.ListVersionIdentifier}");
+                        Console.WriteLine($"MeterId: {list.MeterId}");
+                        Console.WriteLine($"MeterType: {list.MeterType}");
                         Console.WriteLine("");
                         break;
                 }
@@ -54,6 +64,9 @@ namespace MBus {
                     case ListType.List1:
                         return DecodeList1Packet(packet);
 
+                    case ListType.List9:
+                        return DecodeList9Packet(packet);
+
                     default:
                         Console.WriteLine("Found unknown list:");
                         OutputPacketAsHex(packet);
@@ -73,6 +86,20 @@ namespace MBus {
                 RawData = data,
                 Date = date,
                 ActivePower = power
+            };
+        }
+
+        private static ListBase DecodeList9Packet(List<byte> data) {
+            var year = BitConverter.ToUInt16(data.Skip(19).Take(2).Reverse().ToArray(), 0);
+            var date = new DateTime(year, data[21], data[22], data[24], data[25], data[26]);
+
+            return new List9() {
+                Type = ListType.List9,
+                RawData = data,
+                Date = date,
+                ListVersionIdentifier = Encoding.ASCII.GetString(data.Skip(35).Take(data[34]).ToArray()),
+                MeterId = Encoding.ASCII.GetString(data.Skip(44).Take(data[43]).ToArray()),
+                MeterType = Encoding.ASCII.GetString(data.Skip(62).Take(data[61]).ToArray()),
             };
         }
 

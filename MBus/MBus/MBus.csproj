@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\List9.cs" />
     <Compile Include="Models\List1.cs" />
     <Compile Include="Models\ListBase.cs" />
     <Compile Include="Models\ListType.cs" />
