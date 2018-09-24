@@ -1,8 +1,15 @@
 # mbus-han-kaifa
-**DIY electronics and code to read data from my KAIFA MA105H2E electricity meter.**
+DIY electronics and code to read data from my KAIFA MA105H2E electricity meter.
+
+## Code
+This library aims to read and decode all packet types from the Norwegian M-Bus smart electricity meters. The screenshot below shows a test application outputting data from the various packet types. Not all packet types have been implemented yet.
+
+![](Screenshots/01.png)
 
 
-## Simple Circuit Diagram - Arduino Analog Input -> TTL
+
+## Electronics
+### Simple Circuit Diagram - Arduino Analog Input -> TTL
 
 This circuit uses a simple voltage divider and an Arduino to convert the resulting 2.2V-3.3V signal to a 5V TTL signal.
 
