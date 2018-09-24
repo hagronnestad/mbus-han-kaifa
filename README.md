@@ -13,7 +13,7 @@ This circuit uses a simple voltage divider and an Arduino to convert the resulti
 
 [Electronics\Arduino\A0_to_TTL\A0_to_TTL.ino](Electronics\Arduino\A0_to_TTL\A0_to_TTL.ino)
 
-Threshold value needs to be tuned based on the voltage divider. Write `val` to serial to find the min and max value and chose a fitting threshold.
+Threshold value needs to be tuned based on the voltage divider. Write `val` to serial to find the min and max value and choose a fitting threshold.
 
 ```arduino
 void setup()

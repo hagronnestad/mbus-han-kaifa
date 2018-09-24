@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MBus.Models;
+using System;
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
@@ -19,37 +20,60 @@ namespace MBus {
 
             while (true) {
                 var packet = GetPacket();
-                OutputPacketAsHex(packet);
-                ParsePacketAndOutputData(packet);
+
+                switch (packet) {
+                    case List1 list:
+                        Console.WriteLine($"Received {list.Type}:");
+                        Console.WriteLine($"DateTime: {list.Date}");
+                        Console.WriteLine($"Active power: {list.ActivePower}");
+                        Console.WriteLine("");
+                        break;
+                }
             }
+
         }
 
-        private static List<byte> GetPacket() {
-            var packet = new List<byte>();
-
+        private static ListBase GetPacket() {
             while (true) {
+                var packet = new List<byte>();
+
                 var b = Sp.ReadByte();
                 if (b != 0x7E) continue;
+                if (Sp.ReadByte() == 0x7E) continue;
 
-                var nextByte = Sp.ReadByte();
+                var packetLength = (byte) Sp.ReadByte();
+                packet.AddRange(new byte[] { 0x7E, 0xA0, packetLength });
 
-                if (nextByte != 0x7E) {
-                    packet.Add(0x7E);
-                }
-
-                packet.Add((byte) nextByte);
-
-                while (packet.Count < 41) {
+                while (packet.Count < packetLength + 2) {
                     packet.Add((byte) Sp.ReadByte());
                 }
 
-                if (packet[40] != 0x7E) {
-                    packet.Clear();
-                    continue;
-                }
+                var type = (ListType) packet[32];
 
-                return packet;
+                switch (type) {
+                    case ListType.List1:
+                        return DecodeList1Packet(packet);
+
+                    default:
+                        Console.WriteLine("Found unknown list:");
+                        OutputPacketAsHex(packet);
+                        Console.WriteLine("");
+                        break;
+                }
             }
+        }
+
+        private static ListBase DecodeList1Packet(List<byte> data) {
+            var power = BitConverter.ToUInt16(data.Skip(36).Take(2).Reverse().ToArray(), 0);
+            var year = BitConverter.ToUInt16(data.Skip(19).Take(2).Reverse().ToArray(), 0);
+            var date = new DateTime(year, data[21], data[22], data[24], data[25], data[26]);
+
+            return new List1() {
+                Type = ListType.List1,
+                RawData = data,
+                Date = date,
+                ActivePower = power
+            };
         }
 
         private static void OutputPacketAsHex(List<byte> packet) {
@@ -58,16 +82,6 @@ namespace MBus {
                 Console.Write(" ");
             }
             Console.WriteLine("");
-        }
-
-        private static void ParsePacketAndOutputData(List<byte> packet) {
-            var power = BitConverter.ToUInt16(packet.Skip(36).Take(2).Reverse().ToArray(), 0);
-            var year = BitConverter.ToUInt16(packet.Skip(19).Take(2).Reverse().ToArray(), 0);
-
-            var date = new DateTime(year, packet[21], packet[22], packet[24], packet[25], packet[26]);
-
-            Console.WriteLine($"Time: {date.ToString("yyyy-MM-dd HH\\:mm\\:ss")}");
-            Console.WriteLine($"Power: {power} W");
         }
 
     }
