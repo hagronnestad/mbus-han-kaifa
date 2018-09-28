@@ -1,4 +1,4 @@
-﻿using MBus.Models;
+using MBus.Models;
 using System;
 using System.Collections.Generic;
 using System.IO.Ports;
@@ -77,7 +77,7 @@ namespace MBus {
         }
 
         private static ListBase DecodeList1Packet(List<byte> data) {
-            var power = BitConverter.ToUInt16(data.Skip(36).Take(2).Reverse().ToArray(), 0);
+            var power = BitConverter.ToUInt32(data.Skip(34).Take(4).Reverse().ToArray(), 0);
             var year = BitConverter.ToUInt16(data.Skip(19).Take(2).Reverse().ToArray(), 0);
             var date = new DateTime(year, data[21], data[22], data[24], data[25], data[26]);
 
