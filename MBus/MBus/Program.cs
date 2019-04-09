@@ -5,12 +5,13 @@ using System.IO;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace MBus {
 
     internal class Program {
 
-        private static SerialPort Sp = new SerialPort("COM3");
+        private static SerialPort Sp = new SerialPort("COM4");
 
         private static void Main(string[] args) {
             Sp.BaudRate = 2400;
@@ -21,10 +22,10 @@ namespace MBus {
             Sp.Open();
 
             while (true) {
-                //var packet = GetPacket(Sp.BaseStream);
+                var packet = GetPacket(Sp.BaseStream);
 
-                var fs = File.OpenRead(@"RawPacketDumps\List3SinglePhase.dat");
-                var packet = GetPacket(fs);
+                //var fs = File.OpenRead(@"RawPacketDumps\List3SinglePhase.dat");
+                //var packet = GetPacket(fs);
 
                 switch (packet) {
                     case List1 list:
@@ -82,13 +83,14 @@ namespace MBus {
 
         private static ListBase GetPacket(Stream stream) {
             while (true) {
-                var packet = new List<byte>();
 
                 var b = stream.ReadByte();
                 if (b != 0x7E) continue;
                 if (stream.ReadByte() == 0x7E) continue;
 
                 var packetLength = (byte) stream.ReadByte();
+                var packet = new List<byte>();
+
                 packet.AddRange(new byte[] { 0x7E, 0xA0, packetLength });
 
                 while (packet.Count < packetLength + 2) {
