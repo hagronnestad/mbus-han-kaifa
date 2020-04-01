@@ -11,9 +11,12 @@ namespace MBus {
 
     internal class Program {
 
-        private static SerialPort Sp = new SerialPort("COM4");
+        private static SerialPort Sp = new SerialPort("COM5");
+        private static StreamWriter f = new StreamWriter("log.txt", true, Encoding.UTF8);
 
         private static void Main(string[] args) {
+
+
             Sp.BaudRate = 2400;
             Sp.DataBits = 8;
             Sp.StopBits = StopBits.One;
@@ -23,6 +26,10 @@ namespace MBus {
 
             while (true) {
                 var packet = GetPacket(Sp.BaseStream);
+
+                if (packet == null) {
+                    continue;
+                }
 
                 //var fs = File.OpenRead(@"RawPacketDumps\List3SinglePhase.dat");
                 //var packet = GetPacket(fs);
@@ -97,6 +104,15 @@ namespace MBus {
                     packet.Add((byte) stream.ReadByte());
                 }
 
+                if (packet.Last() != 0x7E) {
+                    continue;
+                }
+
+                var b64 = Convert.ToBase64String(packet.ToArray());
+                Console.WriteLine(b64);
+                f.WriteLine(b64);
+                f.Flush();
+
                 var type = (ListType) packet[32];
 
                 switch (type) {
@@ -110,10 +126,10 @@ namespace MBus {
                         return DecodeList3SinglePhasePacket(packet);
 
                     default:
-                        Console.WriteLine("Found unknown list:");
+                        Console.WriteLine("Found unknown list!");
                         OutputPacketAsHex(packet);
                         Console.WriteLine("");
-                        break;
+                        return null;
                 }
             }
         }
@@ -184,6 +200,8 @@ namespace MBus {
                 Console.Write(" ");
             }
             Console.WriteLine("");
+
+            Console.WriteLine(Encoding.ASCII.GetString(packet.ToArray()));
         }
 
     }
