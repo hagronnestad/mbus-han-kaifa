@@ -11,7 +11,7 @@ namespace MBus {
 
     internal class Program {
 
-        private static SerialPort Sp = new SerialPort("COM5");
+        private static SerialPort Sp = new SerialPort("COM21");
         private static StreamWriter f = new StreamWriter("log.txt", true, Encoding.UTF8);
 
         private static void Main(string[] args) {
@@ -119,10 +119,16 @@ namespace MBus {
                     case ListType.List1:
                         return DecodeList1Packet(packet);
 
+                    case ListType.List2:
+                        return DecodeList2SinglePhasePacket(packet);
+
                     case ListType.List2SinglePhase:
                         return DecodeList2SinglePhasePacket(packet);
 
                     case ListType.List3SinglePhase:
+                        return DecodeList3SinglePhasePacket(packet);
+
+                    case ListType.List3:
                         return DecodeList3SinglePhasePacket(packet);
 
                     default:
